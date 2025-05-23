@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: market-conversion-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: market_db
+      POSTGRES_USER: market_user
+      POSTGRES_PASSWORD: secret
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - market-db-data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - market-network
+    restart: unless-stopped
+
+
+
+volumes:
+  market-db-data:
+    name: market-db-data
+networks:
+  market-network:
+    name: market-network
