@@ -1,6 +1,7 @@
 package com.wefin.infrastructure.adapters.out.persistence.adapters;
 
 import com.wefin.application.ports.out.ProductRepositoryPort;
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.entities.Product;
 import com.wefin.domain.entities.ProductConversionRule;
 import com.wefin.infrastructure.adapters.out.persistence.entities.ProductConversionRuleEntity;
@@ -12,7 +13,6 @@ import com.wefin.infrastructure.adapters.out.persistence.repositories.ProductRep
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,9 +29,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
     public Product save(Product product) {
         ProductEntity entity = productMapper.toEntity(product);
         if (entity.getCreatedAt() == null) {
-            entity.setCreatedAt(LocalDateTime.now());
+            entity.setCreatedAt(DateResolver.localDateTimeNow());
         }
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateResolver.localDateTimeNow());
         ProductEntity savedEntity = productRepository.save(entity);
         return productMapper.toDomain(savedEntity);
     }
@@ -41,9 +41,9 @@ public class ProductRepositoryAdapter implements ProductRepositoryPort {
         ProductConversionRuleEntity entity = conversionRuleMapper.toEntity(rule);
 
         if (entity.getCreatedAt() == null) {
-            entity.setCreatedAt(LocalDateTime.now());
+            entity.setCreatedAt(DateResolver.localDateTimeNow());
         }
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateResolver.localDateTimeNow());
 
         ProductConversionRuleEntity savedEntity = conversionRuleRepository.save(entity);
         return conversionRuleMapper.toDomain(savedEntity);

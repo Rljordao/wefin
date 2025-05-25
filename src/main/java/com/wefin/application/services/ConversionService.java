@@ -14,13 +14,13 @@ import com.wefin.application.ports.in.ProductPort;
 import com.wefin.application.ports.out.FormulaEvaluatorPort;
 import com.wefin.application.ports.out.ProductRepositoryPort;
 import com.wefin.application.ports.out.TransactionRepositoryPort;
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.entities.ProductConversionRule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -44,6 +44,7 @@ public class ConversionService implements ConversionPort {
         MoneyDTO sourceAmount = MoneyDTO.of(amountValue, sourceCurrency);
 
         ExchangeRateDTO baseRateDTO = currencyPort.getCurrentExchangeRate(sourceCurrencyCode, targetCurrencyCode);
+
         BigDecimal baseRate = baseRateDTO.getRate();
 
         if (productId == null) {
@@ -52,7 +53,6 @@ public class ConversionService implements ConversionPort {
 
         Optional<ProductConversionRule> rule= productRepositoryPort.findActiveConversionRule(
                 productId, sourceCurrency.getId(), targetCurrency.getId());
-
         if (rule.isEmpty()) {
             return sourceAmount.multiply(targetCurrency, baseRate);
         }
@@ -79,7 +79,7 @@ public class ConversionService implements ConversionPort {
                 .sourceAmount(sourceAmount)
                 .status(TransactionDTOStatus.PENDING)
                 .targetAmount(sourceAmount)
-                .transactionDate(LocalDateTime.now())
+                .transactionDate(DateResolver.localDateTimeNow())
                 .build();
 
         TransactionDTO savedTransaction = saveTransaction(transaction);
@@ -91,32 +91,17 @@ public class ConversionService implements ConversionPort {
                     request.getSourceCurrencyCode(),
                     request.getTargetCurrencyCode());
 
-            BigDecimal appliedRate = convertedAmount.calculateRate(sourceAmount);
-
-            savedTransaction = TransactionDTO.builder()
-                    .id(savedTransaction.getId())
-                    .product(product)
-                    .sourceAmount(sourceAmount)
-                    .targetAmount(convertedAmount)
-                    .appliedRate(appliedRate)
-                    .transactionDate(savedTransaction.getTransactionDate())
-                    .status(TransactionDTOStatus.COMPLETED)
-                    .build();
+            savedTransaction.setTargetAmount(convertedAmount);
+            savedTransaction.setAppliedRate(convertedAmount.calculateRate(sourceAmount));
+            savedTransaction.setStatus(TransactionDTOStatus.COMPLETED);
 
         } catch (Exception e) {
-            savedTransaction = TransactionDTO.builder()
-                    .id(savedTransaction.getId())
-                    .product(product)
-                    .sourceAmount(sourceAmount)
-                    .transactionDate(savedTransaction.getTransactionDate())
-                    .status(TransactionDTOStatus.FAILED)
-                    .notes("Error: " + e.getMessage())
-                    .build();
+            savedTransaction.setStatus(TransactionDTOStatus.FAILED);
+            savedTransaction.setNotes("Error: " + e.getMessage());
             throw e;
         } finally {
             savedTransaction = saveTransaction(savedTransaction);
         }
-
         return savedTransaction;
     }
 

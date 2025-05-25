@@ -13,7 +13,7 @@ public class TransactionFilterCriteria {
     private String sourceCurrencyCode;
     private String targetCurrencyCode;
     private String kingdom;
-    private LocalDateTime fromDate;
-    private LocalDateTime toDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private TransactionStatus status;
 }

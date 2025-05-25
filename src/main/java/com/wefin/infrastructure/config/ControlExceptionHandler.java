@@ -1,6 +1,7 @@
 package com.wefin.infrastructure.config;
 
 
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.exceptions.BaseException;
 import com.wefin.domain.exceptions.BusinessException;
 import com.wefin.domain.exceptions.FormulaEvaluationException;
@@ -17,7 +18,6 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,11 +25,11 @@ import java.util.Objects;
 public class ControlExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
-    public ResponseEntity<Object> handleBaseException(BaseException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleBaseException(BaseException ex, WebRequest request) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode());
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(ex.getStatusCode())
                 .error(status.getReasonPhrase())
                 .message(ex.getMessage())
@@ -41,9 +41,9 @@ public class ControlExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleResourceNotFound(ResourceNotFoundException ex, WebRequest request) {
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.NOT_FOUND.value())
                 .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                 .message(ex.getMessage())
@@ -57,7 +57,7 @@ public class ControlExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Object> handleBusinessException(BusinessException ex, WebRequest request) {
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
@@ -69,9 +69,9 @@ public class ControlExceptionHandler {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Object> handleValidationException(ValidationException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleValidationException(ValidationException ex, WebRequest request) {
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
@@ -83,9 +83,9 @@ public class ControlExceptionHandler {
     }
 
     @ExceptionHandler(FormulaEvaluationException.class)
-    public ResponseEntity<Object> handleFormulaEvaluationException(FormulaEvaluationException ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleFormulaEvaluationException(FormulaEvaluationException ex, WebRequest request) {
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(ex.getMessage())
@@ -96,7 +96,8 @@ public class ControlExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    public ResponseEntity<Object> handleMethodArgumentNotValid(
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
 
         List<ApiErrorResponse.ValidationError> validationErrors = ex.getBindingResult()
@@ -108,7 +109,7 @@ public class ControlExceptionHandler {
                 .toList();
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message("Validation error")
@@ -121,11 +122,11 @@ public class ControlExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Object> handleMethodArgumentTypeMismatch(
+    public ResponseEntity<ApiErrorResponse> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex, WebRequest request) {
 
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
                 .message(String.format("The parameter '%s' should be of type '%s'",
@@ -138,9 +139,9 @@ public class ControlExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleAllUncaughtException(Exception ex, WebRequest request) {
+    public ResponseEntity<ApiErrorResponse> handleAllUncaughtException(Exception ex, WebRequest request) {
         ApiErrorResponse errorResponse = ApiErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
+                .timestamp(DateResolver.localDateTimeNow())
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
                 .message("An unexpected error occurred")

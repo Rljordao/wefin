@@ -33,8 +33,8 @@ public class TransactionService implements TransactionPort {
                 .sourceCurrencyCode(filter.getSourceCurrency())
                 .targetCurrencyCode(filter.getTargetCurrency())
                 .kingdom(filter.getKingdom())
-                .fromDate(fromDateTime)
-                .toDate(toDateTime)
+                .startDate(fromDateTime)
+                .endDate(toDateTime)
                 .status(filter.getStatus() != null ?
                         TransactionStatus.valueOf(filter.getStatus()) : null)
                 .build();

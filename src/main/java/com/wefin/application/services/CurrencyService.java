@@ -7,6 +7,7 @@ import com.wefin.application.mappers.CurrencyDTOMapper;
 import com.wefin.application.mappers.ExchangeRateDTOMapper;
 import com.wefin.application.ports.in.CurrencyPort;
 import com.wefin.application.ports.out.CurrencyRepositoryPort;
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.entities.Currency;
 import com.wefin.domain.entities.ExchangeRate;
 import com.wefin.domain.exceptions.BusinessException;
@@ -15,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +54,7 @@ public class CurrencyService implements CurrencyPort {
                 .targetCurrency(targetCurrency)
                 .rate(request.getRate())
                 .effectiveDate(request.getEffectiveDate() != null ?
-                        request.getEffectiveDate() : LocalDateTime.now())
+                        request.getEffectiveDate() : DateResolver.localDateTimeNow())
                 .active(true)
                 .build();
 

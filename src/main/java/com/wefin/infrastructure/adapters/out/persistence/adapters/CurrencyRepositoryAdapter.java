@@ -1,6 +1,7 @@
 package com.wefin.infrastructure.adapters.out.persistence.adapters;
 
 import com.wefin.application.ports.out.CurrencyRepositoryPort;
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.entities.Currency;
 import com.wefin.domain.entities.ExchangeRate;
 import com.wefin.infrastructure.adapters.out.persistence.entities.ExchangeRateEntity;
@@ -11,7 +12,6 @@ import com.wefin.infrastructure.adapters.out.persistence.repositories.ExchangeRa
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -28,9 +28,9 @@ public class CurrencyRepositoryAdapter implements CurrencyRepositoryPort {
     public ExchangeRate save(ExchangeRate exchangeRate) {
         ExchangeRateEntity entity = exchangeRateMapper.toEntity(exchangeRate);
         if (entity.getCreatedAt() == null) {
-            entity.setCreatedAt(LocalDateTime.now());
+            entity.setCreatedAt(DateResolver.localDateTimeNow());
         }
-        entity.setUpdatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(DateResolver.localDateTimeNow());
 
         ExchangeRateEntity savedEntity = exchangeRateRepository.save(entity);
         return exchangeRateMapper.toDomain(savedEntity);
@@ -55,7 +55,7 @@ public class CurrencyRepositoryAdapter implements CurrencyRepositoryPort {
         exchangeRateRepository.findById(exchangeRateId)
                 .ifPresent(entity -> {
                     entity.setActive(false);
-                    entity.setUpdatedAt(LocalDateTime.now());
+                    entity.setUpdatedAt(DateResolver.localDateTimeNow());
                     exchangeRateRepository.save(entity);
                 });
     }

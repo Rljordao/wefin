@@ -10,15 +10,14 @@ import com.wefin.application.mappers.ProductDTOMapper;
 import com.wefin.application.ports.in.CurrencyPort;
 import com.wefin.application.ports.in.ProductPort;
 import com.wefin.application.ports.out.ProductRepositoryPort;
+import com.wefin.application.util.DateResolver;
 import com.wefin.domain.entities.Product;
 import com.wefin.domain.entities.ProductConversionRule;
-import com.wefin.domain.exceptions.BusinessException;
 import com.wefin.domain.exceptions.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -58,7 +57,7 @@ public class ProductService implements ProductPort {
                 .sourceCurrency(sourceCurrency)
                 .targetCurrency(targetCurrency)
                 .conversionFormula(request.getConversionFormula())
-                .effectiveDate(request.getEffectiveDate() != null ? request.getEffectiveDate() : LocalDateTime.now())
+                .effectiveDate(request.getEffectiveDate() != null ? request.getEffectiveDate() : DateResolver.localDateTimeNow())
                 .active(true)
                 .build();
 
